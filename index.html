@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz de Français — Révisions Collège · DP2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;1,9..144,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --bg-card: #FFFFFF;
+    --primary: #2D5A3D;
+    --primary-light: #E8F5E9;
+    --accent: #E8913A;
+    --accent-light: #FFF3E6;
+    --correct: #2D8A4E;
+    --correct-bg: #E6F7EC;
+    --incorrect: #C0392B;
+    --incorrect-bg: #FDECEB;
+    --text: #2C2C2C;
+    --text-light: #6B6B6B;
+    --border: #E8E0D8;
+    --shadow: 0 2px 16px rgba(45,90,61,0.08);
+    --shadow-lg: 0 8px 32px rgba(45,90,61,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #2D5A3D 0%, #3A7A52 50%, #2D5A3D 100%);
+    color: white;
+    padding: 48px 24px 56px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '✦ ✦ ✦';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: 12px;
+    opacity: 0.4;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero p {
+    font-size: 1rem;
+    opacity: 0.85;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .badge-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .progress-info .category-tag {
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: #EDE8E2;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 8px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    box-shadow: var(--shadow);
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-number {
+    font-family: 'Fraunces', serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .question-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .question-context {
+    font-size: 0.88rem;
+    color: var(--text-light);
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 18px;
+    background: #FAFAF8;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    text-align: left;
+    transition: all 0.2s ease;
+    color: var(--text);
+  }
+
+  .option-btn:hover:not(.disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateX(4px);
+  }
+
+  .option-letter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .option-btn:hover:not(.disabled) .option-letter {
+    background: var(--primary);
+    color: white;
+  }
+
+  .option-btn.correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+  .option-btn.correct .option-letter {
+    background: var(--correct);
+    color: white;
+  }
+
+  .option-btn.incorrect {
+    border-color: var(--incorrect);
+    background: var(--incorrect-bg);
+  }
+  .option-btn.incorrect .option-letter {
+    background: var(--incorrect);
+    color: white;
+  }
+
+  .option-btn.disabled { cursor: default; opacity: 0.7; }
+  .option-btn.correct.disabled { opacity: 1; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .feedback.correct {
+    background: var(--correct-bg);
+    border-left: 4px solid var(--correct);
+    color: #1B5E30;
+  }
+
+  .feedback.incorrect {
+    background: var(--incorrect-bg);
+    border-left: 4px solid var(--incorrect);
+    color: #8B1A1A;
+  }
+
+  .feedback .emoji { font-size: 1.2rem; margin-right: 6px; }
+
+  .feedback .tip {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* Next button */
+  .next-btn {
+    display: block;
+    margin: 24px auto 0;
+    padding: 14px 40px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .next-btn:hover { background: #245030; transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+
+  /* Results */
+  .results {
+    text-align: center;
+    animation: slideUp 0.5s ease;
+  }
+
+  .results-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 6px solid;
+  }
+
+  .results-circle.excellent { border-color: var(--correct); background: var(--correct-bg); }
+  .results-circle.good { border-color: var(--accent); background: var(--accent-light); }
+  .results-circle.needs-work { border-color: var(--incorrect); background: var(--incorrect-bg); }
+
+  .results-circle .score-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .results-circle .score-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  .results h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+
+  .results .subtitle {
+    color: var(--text-light);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+  }
+
+  .category-results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+
+  @media (max-width: 500px) {
+    .category-results { grid-template-columns: 1fr; }
+  }
+
+  .cat-card {
+    background: #FAFAF8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+
+  .cat-card .cat-name {
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+    margin-bottom: 4px;
+  }
+
+  .cat-card .cat-score {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .cat-card .cat-bar {
+    height: 5px;
+    background: #EDE8E2;
+    border-radius: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .cat-card .cat-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease;
+  }
+
+  .restart-btn {
+    padding: 14px 40px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+  }
+
+  .restart-btn:hover { background: #245030; transform: translateY(-1px); }
+
+  /* Review section */
+  .review-section {
+    margin-top: 36px;
+    text-align: left;
+  }
+
+  .review-section h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .review-item {
+    background: #FAFAF8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .review-item.was-wrong { border-left: 4px solid var(--incorrect); }
+  .review-item.was-right { border-left: 4px solid var(--correct); }
+
+  .review-item .rq { font-weight: 600; font-size: 0.92rem; margin-bottom: 6px; }
+  .review-item .ra { font-size: 0.85rem; color: var(--text-light); }
+  .review-item .ra strong { color: var(--correct); }
+
+  /* Start screen */
+  .start-screen {
+    text-align: center;
+    animation: slideUp 0.4s ease;
+  }
+
+  .start-screen .intro-text {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 28px;
+    line-height: 1.7;
+  }
+
+  .start-screen .start-btn {
+    padding: 16px 48px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .start-screen .start-btn:hover { background: #D17F2E; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .categories-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .categories-preview span {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .disclaimer {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin-top: 20px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Quiz de Français 🇫🇷</h1>
+  <p>Révisions des notions essentielles du collège — Niveau DP2</p>
+  <div class="badge-row">
+    <span class="badge">30 questions</span>
+    <span class="badge">5 catégories</span>
+    <span class="badge">Apprentissage positif</span>
+  </div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+const questions = [
+  // ═══════════════ GRAMMAIRE (6) ═══════════════
+  {
+    category: "Grammaire",
+    question: "Dans la phrase « Les enfants <u>que</u> j'ai vus jouaient dehors », quelle est la fonction du mot souligné ?",
+    context: "Analyse grammaticale — les pronoms relatifs",
+    options: ["Sujet", "Complément d'objet direct", "Complément d'objet indirect", "Complément circonstanciel"],
+    correct: 1,
+    feedbackCorrect: "Exactement ! « Que » est pronom relatif COD — il remplace « les enfants », complément direct de « ai vus ». Note que le participe passé s'accorde ici avec le COD placé avant !",
+    feedbackIncorrect: "« Que » reprend « les enfants » et répond à la question « j'ai vu QUI ? » → c'est un COD. Remarque : c'est pour ça que « vus » s'accorde au masculin pluriel !",
+    tip: "Astuce : remplace le pronom relatif par son antécédent pour trouver sa fonction."
+  },
+  {
+    category: "Grammaire",
+    question: "Quelle phrase contient un complément circonstanciel de cause ?",
+    context: "Les compléments circonstanciels",
+    options: [
+      "Il est parti à huit heures.",
+      "Elle a réussi grâce à son travail.",
+      "Nous irons à la plage.",
+      "Il parle avec enthousiasme."
+    ],
+    correct: 1,
+    feedbackCorrect: "Bravo ! « Grâce à son travail » répond à la question POURQUOI et exprime la cause de la réussite.",
+    feedbackIncorrect: "« Grâce à son travail » exprime la raison (POURQUOI elle a réussi) = CC de cause. Les autres expriment le temps, le lieu, ou la manière.",
+    tip: "Pour identifier un CC de cause, pose la question « pourquoi ? » ou « à cause de quoi ? »."
+  },
+  {
+    category: "Grammaire",
+    question: "« Bien qu'il <u>___</u> fatigué, il a continué. » Quel mode faut-il utiliser après « bien que » ?",
+    context: "Les modes verbaux après les conjonctions",
+    options: ["L'indicatif (est)", "Le subjonctif (soit)", "Le conditionnel (serait)", "L'infinitif (être)"],
+    correct: 1,
+    feedbackCorrect: "Parfait ! « Bien que » exprime la concession et exige toujours le subjonctif. → « Bien qu'il soit fatigué ».",
+    feedbackIncorrect: "Après « bien que », on utilise toujours le subjonctif. On dit : « Bien qu'il soit fatigué ». C'est une règle incontournable !",
+    tip: "Conjonctions + subjonctif : bien que, quoique, pour que, afin que, avant que..."
+  },
+  {
+    category: "Grammaire",
+    question: "Identifie la nature (classe grammaticale) du mot « rapidement » :",
+    context: "Les classes grammaticales",
+    options: ["Adjectif", "Adverbe", "Nom", "Préposition"],
+    correct: 1,
+    feedbackCorrect: "Très bien ! « Rapidement » est un adverbe de manière. Il modifie un verbe, un adjectif ou un autre adverbe, et il est invariable.",
+    feedbackIncorrect: "« Rapidement » est un adverbe (il se termine en -ment, formé sur l'adjectif « rapide »). Un adverbe est invariable et modifie un verbe, un adjectif ou un autre adverbe.",
+    tip: "La plupart des adverbes de manière se forment ainsi : adjectif au féminin + -ment (lente → lentement)."
+  },
+  {
+    category: "Grammaire",
+    question: "Dans « Marie et Pierre sont partis en vacances », pourquoi le participe passé s'écrit-il « partis » ?",
+    context: "L'accord du participe passé avec être",
+    options: [
+      "Il s'accorde avec le COD",
+      "Il s'accorde avec le sujet « Marie et Pierre » (mixte = masculin pluriel)",
+      "Il ne s'accorde jamais avec être",
+      "Il s'accorde avec le complément de lieu"
+    ],
+    correct: 1,
+    feedbackCorrect: "Excellent ! Avec l'auxiliaire « être », le participe passé s'accorde toujours avec le sujet. Sujet mixte (fém. + masc.) = masculin pluriel.",
+    feedbackIncorrect: "Avec « être », le PP s'accorde avec le sujet. Marie (F) + Pierre (M) = masculin pluriel → « partis ». Le masculin l'emporte dans un groupe mixte.",
+    tip: "Être = accord avec le sujet. Avoir = accord avec le COD placé AVANT (et seulement dans ce cas)."
+  },
+  {
+    category: "Grammaire",
+    question: "Quelle est la proposition subordonnée dans : « Je pense <u>qu'il viendra demain</u> » ?",
+    context: "L'analyse de la phrase complexe",
+    options: [
+      "« Je pense » — proposition principale",
+      "« qu'il viendra demain » — subordonnée conjonctive COD",
+      "« demain » — subordonnée circonstancielle",
+      "Il n'y a pas de subordonnée"
+    ],
+    correct: 1,
+    feedbackCorrect: "C'est ça ! « Qu'il viendra demain » est introduite par la conjonction « que » et complète le verbe « pense » → c'est une subordonnée conjonctive complétive (COD).",
+    feedbackIncorrect: "« Qu'il viendra demain » est une proposition subordonnée conjonctive, introduite par « que », qui joue le rôle de COD du verbe « pense » (je pense QUOI ?).",
+    tip: "Une subordonnée complétive répond à la question QUOI ? après le verbe principal."
+  },
+
+  // ═══════════════ CONJUGAISON (7) ═══════════════
+  {
+    category: "Conjugaison",
+    question: "Conjugue « résoudre » à la 1ʳᵉ personne du singulier au passé simple :",
+    context: "Le passé simple — verbes du 3ᵉ groupe",
+    options: ["Je résolus", "Je résoudis", "Je résolvai", "Je résoudai"],
+    correct: 0,
+    feedbackCorrect: "Bravo ! « Résoudre » au passé simple donne « je résolus, tu résolus, il résolut… ». C'est un passé simple en -us, comme « connaître → je connus ».",
+    feedbackIncorrect: "« Résoudre » fait « je résolus » au passé simple (type en -us). C'est un verbe irrégulier : il change de radical.",
+    tip: "Passé simple en -us : résoudre (résolus), connaître (connus), lire (lus), vivre (vécus)."
+  },
+  {
+    category: "Conjugaison",
+    question: "« Si j'avais su, je ___ venu plus tôt. » Quel temps complète cette phrase ?",
+    context: "La concordance des temps dans le système hypothétique",
+    options: ["serais (conditionnel passé)", "serai (futur simple)", "suis (présent)", "fus (passé simple)"],
+    correct: 0,
+    feedbackCorrect: "Parfait ! Si + plus-que-parfait → conditionnel passé. « Si j'avais su, je serais venu. » C'est l'irréel du passé.",
+    feedbackIncorrect: "La règle : Si + plus-que-parfait → conditionnel passé. Donc : « Si j'avais su, je serais venu. » C'est une hypothèse irréelle dans le passé.",
+    tip: "Les 3 systèmes : Si + présent → futur / Si + imparfait → conditionnel présent / Si + PQP → conditionnel passé."
+  },
+  {
+    category: "Conjugaison",
+    question: "Quel est le subjonctif présent de « aller » à la 3ᵉ personne du pluriel ?",
+    context: "Le subjonctif présent — verbes irréguliers",
+    options: ["qu'ils vont", "qu'ils allent", "qu'ils aillent", "qu'ils iront"],
+    correct: 2,
+    feedbackCorrect: "Très bien ! « Aller » au subjonctif présent : que j'aille, que tu ailles, qu'il aille, que nous allions, que vous alliez, qu'ils aillent.",
+    feedbackIncorrect: "Attention, « aller » est irrégulier au subjonctif : qu'ils aillent (et non *allent). Nous et vous gardent le radical « all- » : que nous allions, que vous alliez.",
+    tip: "Les verbes très irréguliers au subjonctif : aller (aille), être (sois), avoir (aie), faire (fasse), savoir (sache), pouvoir (puisse), vouloir (veuille)."
+  },
+  {
+    category: "Conjugaison",
+    question: "« Nous (peindre) ___ un tableau hier. » Conjugue au passé composé :",
+    context: "Le participe passé des verbes en -indre",
+    options: ["Nous avons peindé", "Nous avons peint", "Nous avons peins", "Nous avons peindu"],
+    correct: 1,
+    feedbackCorrect: "Exact ! Le participe passé de « peindre » est « peint ». Tous les verbes en -indre font -int au PP : éteint, atteint, joint, craint.",
+    feedbackIncorrect: "Peindre → peint (PP irrégulier). Les verbes en -indre perdent le « d » et font -int : peint, éteint, atteint, craint.",
+    tip: "Verbes en -indre → PP en -int / Verbes en -endre, -ondre → PP en -u (rendu, fondu)."
+  },
+  {
+    category: "Conjugaison",
+    question: "Choisis la forme correcte : « Il faut que tu ___ tes devoirs avant ce soir. »",
+    context: "L'emploi du subjonctif après « il faut que »",
+    options: ["fais", "fasses", "fera", "ferais"],
+    correct: 1,
+    feedbackCorrect: "Exactement ! « Il faut que » impose le subjonctif → « que tu fasses ». Le subjonctif de « faire » : que je fasse, que tu fasses, qu'il fasse...",
+    feedbackIncorrect: "Après « il faut que », on utilise toujours le subjonctif. « Faire » au subjonctif → que tu fasses.",
+    tip: "« Il faut que » + subjonctif, toujours ! C'est la structure la plus fréquente du subjonctif."
+  },
+  {
+    category: "Conjugaison",
+    question: "Quel temps est utilisé dans : « Chaque matin, il se levait tôt et partait travailler » ?",
+    context: "Les valeurs des temps du passé",
+    options: ["Passé composé — action achevée", "Imparfait — habitude dans le passé", "Passé simple — action ponctuelle", "Plus-que-parfait — antériorité"],
+    correct: 1,
+    feedbackCorrect: "Bien vu ! L'imparfait exprime ici une habitude répétée dans le passé (signalée par « chaque matin »). C'est sa valeur itérative.",
+    feedbackIncorrect: "« Se levait » et « partait » sont à l'imparfait. « Chaque matin » indique une habitude → c'est la valeur itérative de l'imparfait.",
+    tip: "Valeurs de l'imparfait : habitude (itératif), description, arrière-plan, politesse (« je voulais vous demander... »)."
+  },
+  {
+    category: "Conjugaison",
+    question: "« Après qu'il ___ mangé, il est sorti. » Quel est le temps correct ?",
+    context: "Après que + indicatif ou subjonctif ?",
+    options: ["ait (subjonctif passé)", "a (passé composé — indicatif)", "eut (passé antérieur)", "avait (plus-que-parfait)"],
+    correct: 2,
+    feedbackCorrect: "Correct ! Dans la langue soutenue/littéraire, « après que » se construit avec l'indicatif, et le passé antérieur exprime l'antériorité. En usage courant, le subjonctif est toléré mais l'indicatif reste la règle officielle.",
+    feedbackIncorrect: "« Après que » se construit officiellement avec l'indicatif (≠ « avant que » + subjonctif). Le passé antérieur (il eut mangé) marque l'antériorité dans un récit au passé simple.",
+    tip: "Avant que + subjonctif / Après que + indicatif (règle officielle, même si l'usage courant accepte le subjonctif)."
+  },
+
+  // ═══════════════ ORTHOGRAPHE (6) ═══════════════
+  {
+    category: "Orthographe",
+    question: "Quelle phrase est correctement orthographiée ?",
+    context: "Les homophones grammaticaux : ce / se",
+    options: [
+      "Ce sont des erreurs qui ce répètent.",
+      "Se sont des erreurs qui se répètent.",
+      "Ce sont des erreurs qui se répètent.",
+      "Se sont des erreurs qui ce répètent."
+    ],
+    correct: 2,
+    feedbackCorrect: "Parfait ! « Ce » = démonstratif (ce + verbe être / ce + nom). « Se » = pronom réfléchi devant un verbe pronominal (se répéter).",
+    feedbackIncorrect: "« Ce sont » = démonstratif + être / « se répètent » = verbe pronominal (se répéter). Truc : « se » peut être remplacé par « me » → « je me répète » = pronominal.",
+    tip: "Test : remplace par « me/te ». Si ça marche → « se ». Sinon → « ce »."
+  },
+  {
+    category: "Orthographe",
+    question: "Comment accorde-t-on « tout » dans : « Elles sont ___ contentes » ?",
+    context: "L'accord de « tout » adverbe",
+    options: ["tout (invariable)", "toute (fém. sing.)", "toutes (fém. pluriel)", "tous (masc. pluriel)"],
+    correct: 2,
+    feedbackCorrect: "Exactement ! Normalement, « tout » adverbe est invariable. MAIS devant un adjectif féminin commençant par une consonne ou un h aspiré, il s'accorde → « toutes contentes ».",
+    feedbackIncorrect: "Exception célèbre : « tout » adverbe s'accorde au féminin devant un adjectif féminin qui commence par une consonne : toutes contentes, toute surprise. Mais : tout étonnées (voyelle → pas d'accord).",
+    tip: "« Tout » adverbe + adj fém commençant par consonne/h aspiré → accord. Sinon → invariable."
+  },
+  {
+    category: "Orthographe",
+    question: "Choisis la bonne orthographe : « Les efforts qu'il a ___ ont porté leurs fruits. »",
+    context: "L'accord du participe passé avec « avoir »",
+    options: ["fait", "faits", "faites", "fais"],
+    correct: 1,
+    feedbackCorrect: "Bravo ! Avec « avoir », le PP s'accorde avec le COD placé AVANT. Le COD « qu' » (= les efforts, masc. pluriel) est avant → « faits ».",
+    feedbackIncorrect: "Avec l'auxiliaire « avoir », le PP s'accorde avec le COD quand il est placé AVANT le verbe. Ici, « qu' » reprend « les efforts » (masc. plur.) → « faits ».",
+    tip: "Méthode : 1) Auxiliaire avoir ? 2) Cherche le COD. 3) Il est AVANT le verbe ? → Accorde. APRÈS ou absent ? → Pas d'accord."
+  },
+  {
+    category: "Orthographe",
+    question: "Quelle est la bonne orthographe ?",
+    context: "Les homophones : quoique / quoi que",
+    options: [
+      "Quoique tu fasses, je te soutiendrai.",
+      "Quoi que tu fasses, je te soutiendrai.",
+      "Quoi qu'il en soit, il viendra quoiqu'il soit fatigué — les deux sens sont identiques.",
+      "Quoiqu'il fasse beau, restons dedans."
+    ],
+    correct: 1,
+    feedbackCorrect: "Très bien ! « Quoi que » (en deux mots) = « quelle que soit la chose que » → « Quoi que tu fasses ». « Quoique » (en un mot) = « bien que » → « Quoiqu'il soit fatigué ».",
+    feedbackIncorrect: "« Quoi que » (2 mots) = peu importe ce que. « Quoique » (1 mot) = bien que. Ici, le sens est « peu importe ce que tu fasses » → « Quoi que ».",
+    tip: "Test : remplace par « bien que ». Si ça marche → quoique (1 mot). Sinon → quoi que (2 mots)."
+  },
+  {
+    category: "Orthographe",
+    question: "Complète : « Les fleurs que j'ai ___ sont magnifiques. »",
+    context: "PP des verbes pronominaux et accord avec avoir",
+    options: ["cueilli", "cueillis", "cueillies", "cueillits"],
+    correct: 2,
+    feedbackCorrect: "Excellent ! Le COD « que » reprend « les fleurs » (féminin pluriel), placé avant l'auxiliaire « avoir » → accord : cueillies.",
+    feedbackIncorrect: "Avec « avoir », le PP s'accorde avec le COD s'il est placé avant. « Que » = « les fleurs » (fém. plur.) → cueillies.",
+    tip: "Cueillir → cueilli (PP régulier du 3ᵉ groupe en -ir). L'accord dépend du COD antéposé."
+  },
+  {
+    category: "Orthographe",
+    question: "Quelle phrase est correcte ?",
+    context: "Quelque(s) / quel(s) que — les homophones complexes",
+    options: [
+      "Quelques soient vos raisons, je refuse.",
+      "Quelles que soient vos raisons, je refuse.",
+      "Quel que soient vos raisons, je refuse.",
+      "Quelque soient vos raisons, je refuse."
+    ],
+    correct: 1,
+    feedbackCorrect: "Parfait ! « Quel(le)(s) que + subjonctif de être + sujet » → l'adjectif « quel » s'accorde avec le sujet « vos raisons » (fém. plur.) → quelles que soient.",
+    feedbackIncorrect: "La structure est : quel(le)(s) que + subjonctif de être + sujet. « Vos raisons » = fém. plur. → « Quelles que soient vos raisons ». Attention à ne pas confondre avec « quelques » (déterminant indéfini).",
+    tip: "« Quel(les) que soient » s'accorde avec ce qui suit le verbe. Pense : QUEL + QUE + ÊTRE (subj) + SUJET."
+  },
+
+  // ═══════════════ VOCABULAIRE (6) ═══════════════
+  {
+    category: "Vocabulaire",
+    question: "Quel est le sens du préfixe « anti- » dans « antidouleur » ?",
+    context: "La formation des mots — les préfixes",
+    options: ["Avant", "Contre", "Au-dessus", "À nouveau"],
+    correct: 1,
+    feedbackCorrect: "C'est ça ! « Anti- » vient du grec et signifie « contre ». Antidouleur = contre la douleur. Comme dans : antibruit, anticonstitutionnel, antisocial.",
+    feedbackIncorrect: "« Anti- » signifie « contre » (du grec). Ne pas confondre avec « anté- » qui signifie « avant » (antérieur, antécédent).",
+    tip: "Anti- = contre (grec) / Anté- = avant (latin) / Pré- = avant (latin aussi, mais plus courant)."
+  },
+  {
+    category: "Vocabulaire",
+    question: "Quel mot est un antonyme de « prolixe » ?",
+    context: "Les antonymes — niveau soutenu",
+    options: ["Bavard", "Concis", "Verbeux", "Loquace"],
+    correct: 1,
+    feedbackCorrect: "Exact ! « Prolixe » = qui parle ou écrit trop longuement. Son contraire est « concis » = bref et précis. Bavard, verbeux et loquace sont des synonymes de prolixe.",
+    feedbackIncorrect: "« Prolixe » signifie « qui utilise trop de mots ». Son antonyme est « concis » (bref, précis). Les trois autres mots (bavard, verbeux, loquace) sont en fait des synonymes !",
+    tip: "Famille du concis : concision (nom), concisément (adverbe). Utile pour le commentaire littéraire !"
+  },
+  {
+    category: "Vocabulaire",
+    question: "Que signifie le mot « ubiquité » ?",
+    context: "Le vocabulaire soutenu",
+    options: [
+      "La capacité d'être partout à la fois",
+      "L'art de convaincre",
+      "Un sentiment de nostalgie",
+      "Une qualité de transparence"
+    ],
+    correct: 0,
+    feedbackCorrect: "Très bien ! « Ubiquité » (du latin ubique = partout) désigne la faculté d'être présent partout en même temps. Expression courante : « Je n'ai pas le don d'ubiquité ! »",
+    feedbackIncorrect: "L'ubiquité = le fait d'être partout à la fois (latin ubique = partout). On l'utilise souvent dans : « Je n'ai pas le don d'ubiquité ! » = je ne peux pas être partout.",
+    tip: "Ce mot est très utile en dissertation pour parler de l'omniprésence des réseaux sociaux, de la technologie, etc."
+  },
+  {
+    category: "Vocabulaire",
+    question: "Dans le champ lexical de la justice, quel mot est l'intrus ?",
+    context: "Les champs lexicaux",
+    options: ["Verdict", "Réquisitoire", "Plaidoyer", "Soliloque"],
+    correct: 3,
+    feedbackCorrect: "Bravo ! « Soliloque » appartient au champ lexical du théâtre (= monologue, discours qu'un personnage se tient à lui-même). Verdict, réquisitoire et plaidoyer → justice/tribunal.",
+    feedbackIncorrect: "« Soliloque » = monologue intérieur (théâtre). Les autres appartiennent au tribunal : verdict (décision), réquisitoire (discours du procureur), plaidoyer (discours de la défense).",
+    tip: "Au tribunal : réquisitoire (accusation) ≠ plaidoyer/plaidoirie (défense). Utile pour l'essai argumentatif !"
+  },
+  {
+    category: "Vocabulaire",
+    question: "Quel est le sens de l'expression « un euphémisme » ?",
+    context: "Les figures de style comme vocabulaire",
+    options: [
+      "Une exagération volontaire",
+      "Une atténuation d'une réalité désagréable",
+      "Une comparaison implicite",
+      "Une répétition insistante"
+    ],
+    correct: 1,
+    feedbackCorrect: "Parfait ! Un euphémisme adoucit une réalité jugée trop crue. Ex : « Il nous a quittés » pour « il est mort ». À ne pas confondre avec l'hyperbole (exagération) !",
+    feedbackIncorrect: "L'euphémisme atténue une réalité déplaisante. Ex : « les non-voyants » au lieu de « les aveugles ». L'exagération, c'est l'hyperbole ; la comparaison implicite, c'est la métaphore ; la répétition insistante, c'est l'anaphore.",
+    tip: "Euphémisme ≠ Litote. La litote dit le moins pour suggérer le plus : « Ce n'est pas mal » = c'est très bien."
+  },
+  {
+    category: "Vocabulaire",
+    question: "Quelle est l'étymologie du mot « philosophie » ?",
+    context: "L'étymologie grecque et latine",
+    options: [
+      "Du latin « filo » (fil) et « sophia » (sagesse)",
+      "Du grec « philos » (ami) et « sophia » (sagesse)",
+      "Du grec « phos » (lumière) et « logos » (discours)",
+      "Du latin « pensare » (penser)"
+    ],
+    correct: 1,
+    feedbackCorrect: "Exact ! Philosophie = du grec philos (ami, qui aime) + sophia (sagesse) → « amour de la sagesse ». Le philosophe est littéralement un « ami de la sagesse ».",
+    feedbackIncorrect: "Philosophie vient du grec : philos (ami, celui qui aime) + sophia (sagesse). Le philosophe est donc un « ami de la sagesse ». Attention : « phil- » vient du grec, pas du latin « fil- ».",
+    tip: "Racines grecques courantes : phil- (aimer), soph- (sagesse), log-/logos (discours, science), graph- (écrire)."
+  },
+
+  // ═══════════════ FIGURES DE STYLE & LITTÉRATURE (5) ═══════════════
+  {
+    category: "Figures de style & Littérature",
+    question: "« La Terre était un désert de glace. » Quelle figure de style est utilisée ?",
+    context: "Identifier les figures de style",
+    options: ["Comparaison", "Métaphore", "Personnification", "Oxymore"],
+    correct: 1,
+    feedbackCorrect: "C'est bien une métaphore ! Il n'y a pas de mot-outil de comparaison (comme, tel que, semblable à...). La Terre EST directement assimilée à un désert de glace.",
+    feedbackIncorrect: "C'est une métaphore : on assimile la Terre à un désert de glace SANS outil de comparaison. Avec « comme » → ce serait une comparaison (« La Terre était comme un désert de glace »).",
+    tip: "Comparaison = avec outil (comme, tel, pareil à) / Métaphore = sans outil / Métaphore filée = métaphore prolongée sur plusieurs phrases."
+  },
+  {
+    category: "Figures de style & Littérature",
+    question: "« Cette obscure clarté qui tombe des étoiles » (Corneille). Quelle figure reconnaît-on ?",
+    context: "Les figures d'opposition",
+    options: ["Antithèse", "Oxymore", "Paradoxe", "Chiasme"],
+    correct: 1,
+    feedbackCorrect: "Parfait ! Un oxymore unit deux termes contradictoires dans un même groupe nominal : « obscure clarté ». C'est l'une des citations les plus célèbres pour illustrer cette figure !",
+    feedbackIncorrect: "C'est un oxymore : « obscure » + « clarté » sont contradictoires et placés côte à côte dans le même groupe. L'antithèse oppose dans la phrase, le paradoxe dans l'idée, le chiasme dans la structure (AB/BA).",
+    tip: "Oxymore : les contraires sont dans le même groupe. Antithèse : les contraires sont dans des groupes différents."
+  },
+  {
+    category: "Figures de style & Littérature",
+    question: "Qu'est-ce qu'un registre littéraire « pathétique » ?",
+    context: "Les registres littéraires",
+    options: [
+      "Un registre qui fait rire",
+      "Un registre qui suscite la pitié, l'émotion et la compassion",
+      "Un registre qui crée la peur",
+      "Un registre qui provoque l'admiration"
+    ],
+    correct: 1,
+    feedbackCorrect: "Exact ! Le registre pathétique (du grec pathos = souffrance) vise à émouvoir le lecteur, à susciter la compassion. On le trouve souvent dans les scènes de séparation, de mort, de souffrance.",
+    feedbackIncorrect: "Le registre pathétique (pathos = souffrance) cherche à émouvoir et provoquer la compassion. Le comique fait rire, le fantastique crée la peur/l'hésitation, l'épique provoque l'admiration.",
+    tip: "Registres à connaître : comique, tragique, pathétique, lyrique, épique, satirique, fantastique, polémique."
+  },
+  {
+    category: "Figures de style & Littérature",
+    question: "« Je meurs de soif ! » est un exemple de :",
+    context: "Les figures d'amplification",
+    options: ["Euphémisme", "Litote", "Hyperbole", "Métonymie"],
+    correct: 2,
+    feedbackCorrect: "C'est bien une hyperbole ! On exagère volontairement (on ne meurt pas vraiment de soif) pour donner plus de force à l'expression.",
+    feedbackIncorrect: "C'est une hyperbole = exagération volontaire pour un effet expressif. On ne meurt pas littéralement de soif, on a très soif. Exemples : « mourir de rire », « attendre une éternité ».",
+    tip: "L'hyperbole est omniprésente dans le langage courant. En littérature, elle sert souvent le registre épique ou comique."
+  },
+  {
+    category: "Figures de style & Littérature",
+    question: "Quel type de narrateur utilise le pronom « je » et participe à l'histoire ?",
+    context: "La narration — point de vue",
+    options: [
+      "Narrateur omniscient",
+      "Narrateur externe",
+      "Narrateur interne (personnage)",
+      "Narrateur neutre"
+    ],
+    correct: 2,
+    feedbackCorrect: "Bien vu ! Le narrateur interne (ou narrateur-personnage) utilise « je » et participe à l'action. Son point de vue est subjectif — on ne connaît que ses pensées à lui.",
+    feedbackIncorrect: "Un narrateur qui dit « je » et vit l'histoire = narrateur interne (point de vue interne). L'omniscient sait tout (pensées de tous), l'externe observe de l'extérieur sans accès aux pensées.",
+    tip: "Focalisation interne (je, subjectif) / Focalisation zéro = omniscient / Focalisation externe = caméra."
+  }
+];
+
+// Shuffle
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const shuffledQuestions = shuffle(questions);
+let current = 0;
+let score = 0;
+let answers = [];
+const categories = ["Grammaire", "Conjugaison", "Orthographe", "Vocabulaire", "Figures de style & Littérature"];
+const catColors = { "Grammaire": "#2D5A3D", "Conjugaison": "#8E44AD", "Orthographe": "#E8913A", "Vocabulaire": "#2980B9", "Figures de style & Littérature": "#C0392B" };
+
+const app = document.getElementById('app');
+
+function renderStart() {
+  app.innerHTML = `
+    <div class="start-screen">
+      <div style="font-size:3rem; margin-bottom:16px;">📚</div>
+      <p class="intro-text">
+        Ce quiz couvre <strong>30 questions</strong> sur les notions essentielles de français vues au collège. 
+        L'objectif ? Identifier tes forces et les points à réviser — en toute bienveillance !<br><br>
+        Chaque réponse est accompagnée d'une <strong>explication pédagogique</strong> et d'une astuce mémo. Prends ton temps, c'est un outil d'apprentissage, pas un examen.
+      </p>
+      <div class="categories-preview">
+        ${categories.map(c => `<span>${c}</span>`).join('')}
+      </div>
+      <button class="start-btn" onclick="startQuiz()">Commencer le quiz →</button>
+      <p class="disclaimer">Conçu pour les élèves de DP2 · Approche positive</p>
+    </div>
+  `;
+}
+
+function startQuiz() {
+  current = 0;
+  score = 0;
+  answers = [];
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuestions[current];
+  const letters = ['A', 'B', 'C', 'D'];
+  const pct = Math.round((current / shuffledQuestions.length) * 100);
+
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span>Question ${current + 1} / ${shuffledQuestions.length}</span>
+        <span class="category-tag" style="background:${catColors[q.category]}15; color:${catColors[q.category]}">${q.category}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="question-card">
+      <div class="question-number">Question ${current + 1}</div>
+      <div class="question-text">${q.question}</div>
+      <div class="question-context">${q.context}</div>
+      <div class="options" id="options">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn" onclick="selectAnswer(${i})" data-index="${i}">
+            <span class="option-letter">${letters[i]}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback"></div>
+      <div id="next-area"></div>
+    </div>
+  `;
+}
+
+function selectAnswer(idx) {
+  const q = shuffledQuestions[current];
+  const btns = document.querySelectorAll('.option-btn');
+  const feedbackEl = document.getElementById('feedback');
+  const nextArea = document.getElementById('next-area');
+  const isCorrect = idx === q.correct;
+
+  btns.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    btn.onclick = null;
+    if (i === q.correct) btn.classList.add('correct');
+    if (i === idx && !isCorrect) btn.classList.add('incorrect');
+  });
+
+  if (isCorrect) {
+    score++;
+    feedbackEl.innerHTML = `
+      <div class="feedback correct">
+        <span class="emoji">🎉</span> <strong>Bonne réponse !</strong><br>
+        ${q.feedbackCorrect}
+        <span class="tip">💡 ${q.tip}</span>
+      </div>
+    `;
+  } else {
+    feedbackEl.innerHTML = `
+      <div class="feedback incorrect">
+        <span class="emoji">💪</span> <strong>Pas tout à fait — mais tu apprends !</strong><br>
+        ${q.feedbackIncorrect}
+        <span class="tip">💡 ${q.tip}</span>
+      </div>
+    `;
+  }
+
+  answers.push({ question: q, chosen: idx, correct: isCorrect });
+
+  const isLast = current >= shuffledQuestions.length - 1;
+  nextArea.innerHTML = `<button class="next-btn" onclick="${isLast ? 'showResults()' : 'nextQuestion()'}">${isLast ? 'Voir mes résultats →' : 'Question suivante →'}</button>`;
+}
+
+function nextQuestion() {
+  current++;
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showResults() {
+  const pct = Math.round((score / shuffledQuestions.length) * 100);
+  let level, msg, cls;
+  if (pct >= 80) { level = "Excellent !"; msg = "Tu maîtrises très bien les bases. Continue comme ça !"; cls = "excellent"; }
+  else if (pct >= 55) { level = "Bien joué !"; msg = "De bonnes bases, avec quelques points à consolider. Tu es sur la bonne voie !"; cls = "good"; }
+  else { level = "C'est un début !"; msg = "Ce quiz t'a montré les points à revoir — c'est exactement à ça qu'il sert. Courage !"; cls = "needs-work"; }
+
+  // Category scores
+  const catScores = {};
+  categories.forEach(c => { catScores[c] = { total: 0, correct: 0 }; });
+  answers.forEach(a => {
+    catScores[a.question.category].total++;
+    if (a.correct) catScores[a.question.category].correct++;
+  });
+
+  const wrongAnswers = answers.filter(a => !a.correct);
+
+  app.innerHTML = `
+    <div class="results">
+      <div class="results-circle ${cls}">
+        <span class="score-num">${pct}%</span>
+        <span class="score-label">${score}/${shuffledQuestions.length}</span>
+      </div>
+      <h2>${level}</h2>
+      <p class="subtitle">${msg}</p>
+
+      <div class="category-results">
+        ${categories.map(c => {
+          const s = catScores[c];
+          const p = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
+          const barColor = p >= 80 ? 'var(--correct)' : p >= 50 ? 'var(--accent)' : 'var(--incorrect)';
+          return `
+            <div class="cat-card">
+              <div class="cat-name">${c}</div>
+              <div class="cat-score">${s.correct}/${s.total} <span style="font-size:0.8rem;opacity:0.6">(${p}%)</span></div>
+              <div class="cat-bar"><div class="cat-bar-fill" style="width:${p}%; background:${barColor}"></div></div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      ${wrongAnswers.length > 0 ? `
+        <div class="review-section">
+          <h3>📖 Tes points à réviser</h3>
+          ${wrongAnswers.map(a => {
+            const letters = ['A','B','C','D'];
+            return `
+              <div class="review-item was-wrong">
+                <div class="rq">${a.question.question.replace(/<\/?u>/g, '')}</div>
+                <div class="ra">Ta réponse : ${letters[a.chosen]} · <strong>Bonne réponse : ${letters[a.question.correct]} — ${a.question.options[a.question.correct]}</strong></div>
+                <div class="ra" style="margin-top:4px;">💡 ${a.question.tip}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : '<p style="margin-top:16px;color:var(--correct);font-weight:600;">🏆 Score parfait ! Aucune erreur — impressionnant !</p>'}
+
+      <button class="restart-btn" onclick="renderStart()">↻ Recommencer le quiz</button>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Init
+renderStart();
+</script>
+</body>
+</html>
